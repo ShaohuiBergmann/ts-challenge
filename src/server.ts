@@ -20,11 +20,12 @@ export async function autoCompleteAddress(
     let addresses = locs.map((loc) => {
         const fields = loc.fields;
         console.log("fields,", fields);
+        const cityName = fields.qua.split(" ")[0]
 
         const address: Address = {
             district: fields.stb, //stb
             zip: fields.plz, //plz
-            city: fields.stt, //stt
+            city: cityName, //stt
             street: fields.str, //str
             numbers: fields.hnr, //hnr
         };
@@ -34,22 +35,20 @@ export async function autoCompleteAddress(
 
     console.log("adresses", addresses);
 
-    if (addresses.length > 1) {
-        const addressesReduced = addresses.reduce(
-            (groupedAddress: Object[], address) => {
-                console.log("groupedAdress ", groupedAddress);
-              Object.entries(address).forEach((attr
-                 )=> {
-                    const [key, value] = attr;
-                   
+   const mergedAddress = {
+       district: addresses[0].district, //stb
+       zip: addresses[0].zip, //plz
+       city: addresses[0].city, //stt
+       street: addresses[0].street, //str
+       numbers: [] as any[], //hnr
+   };
 
-              })
-               
-                return groupedAddress;
-            },
-            addresses
-        );
-    }
+   addresses.forEach((address)=> {
+    mergedAddress.numbers.push(address.numbers)
+   })
+   console.log('merged', mergedAddress)
+   addresses.splice(0);
+   addresses.push(mergedAddress);
 
     return {
         count: locs.length,

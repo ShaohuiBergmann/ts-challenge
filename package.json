@@ -27,7 +27,7 @@
         "test": "jest",
         "test-watch": "jest --watchAll",
         "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-        "test-one": "jest --testNamePattern 'find Straße des 17. Juni' "
+        "test-one": "jest --testNamePattern 'find Kasseler' "
     },
     "repository": {
         "type": "git",

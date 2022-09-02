@@ -13,6 +13,7 @@ export async function autoCompleteAddress(
             query,
         },
     });
+
     if (typeof query !== "string") throw new InvalidParameters();
 
     const locs = res.data.locs as any[];
@@ -40,57 +41,48 @@ export async function autoCompleteAddress(
     };
 
     if (addresses.length > 0) {
-        let mergedAddress = {
-            district: addresses[0].district, //stb
-            zip: addresses[0].zip, //plz
-            city: addresses[0].city, //stt
-            street: addresses[0].street, //str
-            numbers: [] as any[], //hnr
-        };
+        const mergeAddrs = [];
 
-        let filterdAddr = addresses.filter((addr) => {
-            return !isSameAddress(mergedAddress, addr);
-        });
-        console.log("filter", filterdAddr);
+        let toBeFilteredAddresses = addresses;
 
-        const mergeAddrs = [mergedAddress];
-        while (filterdAddr.length > 0) {
-            mergedAddress = {
-                district: filterdAddr[0].district, //stb
-                zip: filterdAddr[0].zip, //plz
-                city: filterdAddr[0].city, //stt
-                street: filterdAddr[0].street, //str
-                numbers: [] as any[], //hnr
+        while (toBeFilteredAddresses.length > 0) {
+            let mergedAddress = {
+                district: toBeFilteredAddresses[0].district,
+                zip: toBeFilteredAddresses[0].zip,
+                city: toBeFilteredAddresses[0].city,
+                street: toBeFilteredAddresses[0].street,
+                numbers: [] as any[],
             };
+
             mergeAddrs.push(mergedAddress);
-            filterdAddr = filterdAddr.filter((addr) => {
+            toBeFilteredAddresses = toBeFilteredAddresses.filter((addr) => {
                 return !isSameAddress(mergedAddress, addr);
             });
-        }
+        } //end of while loop
 
-        mergeAddrs.forEach((addr) => {
+        mergeAddrs.forEach((uniqueAddress) => {
             addresses.forEach((address) => {
-                if (isSameAddress(addr, address))
-                    addr.numbers.push(address.numbers);
-                addr.numbers.sort((a, b) => {
-                    a = parseInt(a);
-                    b = parseInt(b);
-                    return a - b;
-                });
-            });
+                if (isSameAddress(uniqueAddress, address))
+                    uniqueAddress.numbers.push(address.numbers);
+            }); //end of inner forEach
+            uniqueAddress.numbers.sort((a, b) => {
+                a = parseInt(a);
+                b = parseInt(b);
+                return a - b;
+            }); //end of sort
         });
 
-        console.log("merged", mergeAddrs);
         addresses.splice(0);
-        console.log("addrs", addresses);
+
         mergeAddrs.sort((addr1, addr2) =>
             addr1.district.localeCompare(addr2.district)
         );
+
         mergeAddrs.forEach((addr) => {
             console.log(addr);
             addresses.push(addr);
         });
-    }
+    } // end of if(address.length > 0)
 
     return {
         count: addresses.length,
